@@ -1,0 +1,77 @@
+{% extends 'main.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<section class="users-list-wrapper">
+    <div class="users-list-filter px-1">
+        <form id="filter-form">
+            {% csrf_token %}
+            <div class="row border border-light rounded py-2 mb-2">
+                <div class="col-12 col-sm-6 col-lg-5">
+                    <label for="level">Level</label>
+                    <fieldset class="form-group">
+                        <select class="form-control" id="level" name="level">
+                            <option value="">--- Select Level ---</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                            <option value="300">300</option>
+                            <option value="400">400</option>
+                        </select>
+                    </fieldset>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-5">
+                    <label for="semester">Semester</label>
+                    <fieldset class="form-group">
+                        <select class="form-control" id="semester" name="semester">
+                            <option value="">--- Select Semester ---</option>
+                            <option value="1">First Semester</option>
+                            <option value="2">Second Semester</option>
+                        </select>
+                    </fieldset>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-2 d-flex align-items-center">
+                    <button type="submit" class="btn btn-block btn-primary glow">Show</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="users-list-table">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    <!-- datatable start -->
+                    <div class="table-responsive">
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            <table id="course_table" class="table">
+                                <thead class="text-center">
+                                <tr>
+                                    <th>Course Title</th>
+                                    <th>Course Code</th>
+                                    <th>Course Unit</th>
+                                    <th>Select</th>
+                                </tr>
+                                </thead>
+                                <tbody class="text-center">
+                                <tr>
+                                    <td colspan="4">No registered course available. Filter search to list</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div class="form-group row" id="submit-btn">
+                                <div class="col-sm-12 col-12 text-right text-sm-right">
+                                    <button type="submit" class="btn btn-block btn-primary glow">Register</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- datatable ends -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}
