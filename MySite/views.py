@@ -1,16 +1,13 @@
-from itertools import permutations
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 
-from MySite.models import Course, Student, CourseRegistration, Timetable, Lecturer
+from MySite.models import Course, Student, CourseRegistration, Timetable
 from MySite.serializers import CourseSerializer, CourseRegistrationSerializer
 
 
@@ -23,12 +20,12 @@ def login_view(request):
         if user is not None:
             login(request, user)
             # Redirect to successful login page
-            return redirect('user_dashboard')  # Replace 'home' with your desired redirect URL
+            return redirect('display_timetable')
         else:
             # Invalid login credentials
             messages.error(request, 'Invalid username or password.')
             return redirect('login')
-    return render(request, 'change_password.html')
+    return render(request, 'login.html')
 
 
 def forgot_password_view(request):
@@ -36,19 +33,16 @@ def forgot_password_view(request):
         email = request.POST['email'].strip()
         try:
             user = User.objects.get(email=email)
-            return redirect('password_reset', args=(user.id,))
+            login(request, user)
+            return redirect('password_reset')
         except User.DoesNotExist:
             messages.error(request, 'Email address not found.')
             return redirect('forgot_password')
     return render(request, 'forgot_password.html')
 
 
-def password_reset_view(request, user_id):
-    try:
-        user = User.objects.get(pk=user_id)
-    except User.DoesNotExist:
-        messages.error(request, 'Invalid user ID.')
-        return redirect('password_reset')
+def password_reset_view(request):
+    user = request.user
 
     if request.method == 'POST':
         new_password1 = request.POST['new_password1'].strip()
@@ -59,8 +53,9 @@ def password_reset_view(request, user_id):
         # Set the new password
         user.set_password(new_password1)
         user.save()
+        logout(request)
         messages.success(request, 'Password reset successfully!')
-        return redirect('password_reset')
+        return redirect('login')
     return render(request, 'password_reset.html')
 
 
@@ -73,11 +68,23 @@ def logout_view(request):
 @login_required
 def get_courses_by_level_and_semester(request):
     if request.method == 'POST' and not request.user.is_superuser:
+        student = Student.objects.get(user=request.user)
         level = request.POST.get('level')
         semester = request.POST.get('semester')
 
-        courses = Course.objects.filter(level=level, semester=semester)
-        serializer = CourseSerializer(courses, many=True)
+        # Get all courses for the level and semester
+        all_courses = Course.objects.filter(level=level, semester=semester)
+
+        # Get student's registered courses for the semester
+        registered_courses = CourseRegistration.objects.filter(
+            student=student, course__level=level, semester=semester
+        ).select_related('course')  # Eager loading
+
+        # Exclude registered courses from all courses
+        available_courses = all_courses.exclude(id__in=[
+            registration.course.id for registration in registered_courses
+        ])
+        serializer = CourseSerializer(available_courses, many=True)
 
         return JsonResponse(serializer.data, safe=False)
     else:
@@ -91,17 +98,29 @@ def get_registered_courses_by_level_and_semester(request):
         level = request.POST.get('level')
         semester = request.POST.get('semester')
 
-        registrations = CourseRegistration.objects.filter(student=student, course__level=level,
-                                                          semester=semester)
-        serializer = CourseRegistrationSerializer(registrations, many=True)
+        # Select courses with details from registrations
+        registered_courses = CourseRegistration.objects.filter(
+            student=student, course__level=level, semester=semester
+        ).select_related('course')  # Eager loading to avoid N+1 queries
 
-        return JsonResponse(serializer.data, safe=False)
+        # Prepare data with course details and registration ID
+        course_data = []
+        for registration in registered_courses:
+            course = registration.course
+            course_data.append({
+                'id': registration.id,  # CourseRegistration ID
+                'code': course.code,
+                'title': course.title,
+                'units': course.units,
+                # Add other relevant course details as needed
+            })
+
+        return JsonResponse(course_data, safe=False)
     else:
         return JsonResponse({'error': 'Unauthorized access or invalid request method.'})
 
 
 @login_required
-@require_POST
 def register_courses(request):
     if not request.user.is_superuser:
         student = Student.objects.get(user=request.user)
@@ -109,7 +128,7 @@ def register_courses(request):
             selected_courses = request.POST.getlist('course_id')
 
             for course_id in selected_courses:
-                course = Course.objects.get(id=course_id)
+                course = Course.objects.get(id=int(course_id))
                 # Check if the course registration already exists
                 existing_registration = CourseRegistration.objects.filter(student=student, course=course,
                                                                           semester=course.semester,
@@ -118,6 +137,8 @@ def register_courses(request):
                 if not existing_registration:
                     CourseRegistration.objects.create(student=student, course=course, semester=course.semester,
                                                       session='2023/2024')
+
+            messages.success(request, 'Course(s) successfully registered')
 
             return redirect('register_courses')
 
@@ -129,24 +150,22 @@ def register_courses(request):
 
 
 @login_required
-@require_POST
 def unregister_courses(request):
     if not request.user.is_superuser:
         student = Student.objects.get(user=request.user)
         if request.method == 'POST':
-            selected_courses = request.POST.getlist('courses')
-            semester = request.POST.get('semester')
+            selected_courses = request.POST.getlist('course_id')
 
-            for course_id in selected_courses:
-                course = Course.objects.get(id=course_id)
+            for reg_id in selected_courses:
                 # Delete the course registration if it exists
-                CourseRegistration.objects.filter(student=student, course=course, semester=semester,
-                                                  session='2023/2024').delete()
+                CourseRegistration.objects.filter(id=int(reg_id)).delete()
+
+            messages.success(request, 'Course(s) successfully unregistered')
 
             # You can redirect or return a success response as needed
-            return redirect('registered_courses')
+            return redirect('unregister_courses')
 
-        return render(request, 'register_courses.html')
+        return render(request, 'registered_courses.html', {'student': student})
     else:
         messages.error(request, "User access not allowed")
         return redirect('login')
@@ -158,28 +177,60 @@ def display_timetable(request):
         student = Student.objects.get(user=request.user)
         level = student.level
 
-    # Retrieve timetable entries for the student's level
-    timetable_entries = Timetable.objects.filter(level=level)
+        # Retrieve timetable entries for the student's level
+        first_timetable_entries = Timetable.objects.filter(level=level, semester='1')
+        second_timetable_entries = Timetable.objects.filter(level=level, semester='2')
 
-    context = {
-        'timetable_entries': timetable_entries,
-        'student_level': level,
-    }
+        for i in first_timetable_entries:
+            print(i.start_time)
+
+        context = {
+            'first_timetable_entries': first_timetable_entries,
+            'second_timetable_entries': second_timetable_entries,
+            'student': student,
+            'days': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            'hours': ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'],
+        }
+
+    else:
+        # Retrieve timetable entries for the student's level
+        first_timetable_entries_100 = Timetable.objects.filter(level='100', semester='1')
+        second_timetable_entries_100 = Timetable.objects.filter(level='100', semester='2')
+        first_timetable_entries_200 = Timetable.objects.filter(level='200', semester='1')
+        second_timetable_entries_200 = Timetable.objects.filter(level='200', semester='2')
+        first_timetable_entries_300 = Timetable.objects.filter(level='300', semester='1')
+        second_timetable_entries_300 = Timetable.objects.filter(level='300', semester='2')
+        first_timetable_entries_400 = Timetable.objects.filter(level='400', semester='1')
+        second_timetable_entries_400 = Timetable.objects.filter(level='400', semester='2')
+
+        context = {
+            'first_timetable_entries_100': first_timetable_entries_100,
+            'second_timetable_entries_100': second_timetable_entries_100,
+            'first_timetable_entries_200': first_timetable_entries_200,
+            'second_timetable_entries_200': second_timetable_entries_200,
+            'first_timetable_entries_300': first_timetable_entries_300,
+            'second_timetable_entries_300': second_timetable_entries_300,
+            'first_timetable_entries_400': first_timetable_entries_400,
+            'second_timetable_entries_400': second_timetable_entries_400,
+            'days': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            'hours': ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'],
+            'admin': True,
+        }
 
     return render(request, 'timetable.html', context)
 
 
 @login_required
 def change_password(request):
+    student = Student.objects.get(user=request.user)
+
     if request.method == 'POST':
         old_password = request.POST.get('old_password')
         new_password1 = request.POST.get('new_password1')
         new_password2 = request.POST.get('new_password2')
 
-        user = request.user
-
         # Check if the old password is correct
-        if not user.check_password(old_password):
+        if not request.user.check_password(old_password):
             messages.error(request, 'Your old password was entered incorrectly. Please enter it again.')
             return redirect('change_password')
 
@@ -189,26 +240,28 @@ def change_password(request):
             return redirect('change_password')
 
         # Update the user's password
-        user.set_password(new_password1)
-        user.save()
+        request.user.set_password(new_password1)
+        request.user.save()
 
         # Update the user's session to reflect the password change
-        update_session_auth_hash(request, user)
+        update_session_auth_hash(request, request.user)
 
         messages.success(request, 'Your password was successfully updated!')
         return redirect('change_password')
 
-    return render(request, 'change_password.html')
+    return render(request, 'change_password.html', {'student': student})
 
 
 def generate_timetable(level, semester, session):
+    Timetable.objects.filter(level=level, semester=semester).delete()
+
     courses = Course.objects.filter(level=level, semester=semester)
 
     if not courses.exists():
         raise ValueError("No courses available for the specified level and semester")
 
     days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
-    hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00']
+    hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00']
 
     # Initialize timetable slots as a dictionary
     timetable_slots = {day: {hour: None for hour in hours} for day in days}
@@ -248,6 +301,7 @@ def generate_timetable(level, semester, session):
                     semester=semester,
                     session=session,
                 )
+                print(timetable_entry.start_time)
                 timetable_entries.append(timetable_entry)
                 assigned_hours += 1
 
@@ -257,22 +311,34 @@ def generate_timetable(level, semester, session):
     return timetable_entries
 
 
-@user_passes_test(lambda u: u.is_superuser)
 def generate_timetable_view(request):
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            level = request.POST.get('level')
+            semester = request.POST.get('semester')
+
+            # Validate inputs (add more validation as needed)
+            if level and semester:
+                # Generate timetable using the trusted algorithm
+                generate_timetable(level, semester, '2023/2024')
+
+                messages.success(request, f"Timetable successfully generated")
+
+        return render(request, 'generate_timetable.html', {'admin': True})
+    else:
+        return redirect('display_timetable')
+
+
+def generate_session_timetable_view(request):
     if request.method == 'POST':
         level = request.POST.get('level')
-        semester = request.POST.get('semester')
 
         # Validate inputs (add more validation as needed)
-        if level and semester:
+        if level:
             # Generate timetable using the trusted algorithm
-            timetable_entries = generate_timetable(level, semester, '2023/2024')
+            generate_timetable(level, '1', '2023/2024')
+            generate_timetable(level, '2', '2023/2024')
 
-            context = {
-                'timetable_entries': timetable_entries,
-                'level': level,
-                'semester': semester,
-            }
-            return render(request, 'generated_timetable.html', context)
+            messages.success(request, f"Timetables successfully generated")
 
-    return render(request, 'generate_timetable.html')
+            return redirect('generate_timetable')

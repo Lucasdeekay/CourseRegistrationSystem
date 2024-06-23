@@ -73,7 +73,7 @@
 
                     <li class="dropdown dropdown-user nav-item"><a class="dropdown-toggle nav-link dropdown-user-link"
                                                                    href="#" data-toggle="dropdown"><span
-                            class="mr-1 user-name text-bold-700">John Doe</span><span class="avatar avatar-online"><img
+                            class="mr-1 user-name text-bold-700">{{ student.first_name }} {{ student.last_name }}</span><span class="avatar avatar-online"><img
                             src="{% static 'assets/images/avatar.png' %}" alt="avatar"><i></i></span></a>
                         <div class="dropdown-menu dropdown-menu-right">
                             <a class="dropdown-item" href="{% url 'logout' %}"><i class="la la-power-off"></i>
@@ -98,6 +98,13 @@
                     <i class="la la-th-list"></i><span class="menu-title">Timetable</span>
                 </a>
             </li>
+            {% if admin %}
+            <li class=" nav-item">
+                <a href="{% url 'generate_timetable' %}">
+                    <i class="la la-calendar"></i><span class="menu-title">Generate Timetable</span>
+                </a>
+            </li>
+            {% else %}
             <li class=" nav-item">
                 <a href="{% url 'register_courses' %}">
                     <i class="la la-list"></i><span class="menu-title">Register Courses</span>
@@ -113,6 +120,7 @@
                     <i class="la la-user-cog"></i><span class="menu-title">Change Password</span>
                 </a>
             </li>
+            {% endif %}
         </ul>
     </div>
 </div>
@@ -137,7 +145,7 @@
 <footer class="footer footer-static footer-light navbar-border navbar-shadow">
     <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2"><span
             class="float-md-left d-block d-md-inline-block">Copyright &copy; 2024</span><span
-            class="float-md-right d-none d-lg-block">Hand-crafted & Made with<i class="la la-heart pink"></i><span
+            class="float-md-right d-none d-lg-block">Dominion University, Ibadan<span
             id="scroll-top"></span></span></p>
 </footer>
 <!-- END: Footer-->

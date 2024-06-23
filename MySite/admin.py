@@ -4,7 +4,7 @@ from .models import Lecturer, Course, Student, Timetable, CourseRegistration
 
 @admin.register(Lecturer)
 class LecturerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'email']
+    list_display = ['name']
 
 
 @admin.register(Course)

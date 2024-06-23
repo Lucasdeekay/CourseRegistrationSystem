@@ -3,7 +3,11 @@
 {% load static %}
 
 {% block content %}
-
+<div id="toast">
+    {% for message in messages %}
+    <div class="alert alert-info" role="alert"><strong></strong><i>{{ message }}</i></div>
+    {% endfor %}
+</div>
 <section class="users-list-wrapper">
     <div class="users-list-filter px-1">
         <form id="filter-registered-form">

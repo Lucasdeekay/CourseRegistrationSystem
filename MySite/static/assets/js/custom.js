@@ -21,7 +21,7 @@ $(function(){
 
     function checkRegisteredCourseAvailability(level, semester) {
       $.ajax({
-        url: "{% url 'get_registered_courses' %}",
+        url: "/get_registered_courses/",
         type: "POST",
         data: {
             level: level,
@@ -30,7 +30,7 @@ $(function(){
         },
         success: function(response) {
           // Update the table rows with available courses
-          updateCourseTable(response.available_courses);
+          updateRegisteredCourseTable(response);
         },
         error: function(error) {
           console.error("Error fetching available courses:", error);
@@ -41,7 +41,7 @@ $(function(){
 
     function checkCourseAvailability(level, semester) {
       $.ajax({
-        url: "{% url 'get_courses' %}",
+        url: "/get_courses/",
         type: "POST",
         data: {
             level: level,
@@ -50,7 +50,7 @@ $(function(){
         },
         success: function(response) {
           // Update the table rows with available courses
-          updateCourseTable(response.available_courses);
+          updateCourseTable(response);
         },
         error: function(error) {
           console.error("Error fetching available courses:", error);
@@ -68,7 +68,22 @@ $(function(){
         tableRow.append($('<td></td>').text(course.title));
         tableRow.append($('<td></td>').text(course.code));
         tableRow.append($('<td></td>').text(course.units + ' Units'));
-        tableRow.append($('<td></td>').append($('<input type="checkbox" name="course_id">')));
+        tableRow.append($('<td></td>').append($(`<input type="checkbox" name="course_id" value="${course.id}">`)));
+        $('#course_table tbody').append(tableRow);
+      });
+    }
+
+    function updateRegisteredCourseTable(availableCourses) {
+      $('#course_table tbody').empty(); // Clear existing rows
+      $('#submit-btn').show();
+
+      availableCourses.forEach(function(course) {
+        console.log(course);
+        const tableRow = $('<tr></tr>');
+        tableRow.append($('<td></td>').text(course.title));
+        tableRow.append($('<td></td>').text(course.code));
+        tableRow.append($('<td></td>').text(course.units + ' Units'));
+        tableRow.append($('<td></td>').append($(`<input type="checkbox" name="course_id" value="${course.id}">`)));
         $('#course_table tbody').append(tableRow);
       });
     }

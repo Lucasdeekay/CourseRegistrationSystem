@@ -1,0 +1,374 @@
+{% extends 'main.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<section class="users-list-wrapper">
+    {% if student %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-header bg-dark">
+                        <h2 class="mt-2 text-white">
+                            User Dashboard
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-text my-3 mx-4 text-left">
+                            First Name: <strong>{{ student.first_name }}</strong>
+                        </h4>
+                        <h4 class="card-text my-3 mx-4 text-left">
+                            Last Name: <strong>{{ student.last_name }}</strong>
+                        </h4>
+                        <h4 class="card-text my-3 mx-4 text-left">
+                            Matric Number: <strong>{{ student.matric_number }}</strong>
+                        </h4>
+                        <h4 class="card-text my-3 mx-4 text-left">
+                            Level: <strong>{{ student.level }}</strong>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="users-list-table">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    {% if first_timetable_entries %}
+                    <div class="table-responsive mb-3">
+                        <h2>First Semester Timetable</h2>
+                        <table class="table">
+                            <thead class="text-center">
+                            <tr>
+                                <th>DAY/TIME</th>
+                                {% for hour in hours %}
+                                <th>{{ hour }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+                            <tbody class="text-center">
+                            {% for day in days %}
+                            <tr>
+                                <th>{{ day }}</th>
+                                {% for hour in hours %}
+                                <th>
+                                    {% for entry in first_timetable_entries %}
+                                    {% if entry.start_time == hour and entry.day == day %}
+                                    {{ entry.course.code }}
+                                    {% endif %}
+                                    {% endfor %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+
+                    {% if second_timetable_entries %}
+                    <div class="table-responsive mb-3">
+                        <h2>Second Semester Timetable</h2>
+                        <table class="table">
+                            <thead class="text-center">
+                            <tr>
+                                <th>DAY/TIME</th>
+                                {% for hour in hours %}
+                                <th>{{ hour }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+                            <tbody class="text-center">
+                            {% for day in days %}
+                            <tr>
+                                <th>{{ day }}</th>
+                                {% for hour in hours %}
+                                <th>
+                                    {% for entry in second_timetable_entries %}
+                                    {% if entry.start_time == hour and entry.day == day %}
+                                    {{ entry.course.code }}
+                                    {% endif %}
+                                    {% endfor %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="users-list-table">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    {% if first_timetable_entries_100 %}
+                    <div class="table-responsive mb-3">
+                        <h2>100Lvl First Semester Timetable</h2>
+                        <table class="table">
+                            <thead class="text-center">
+                            <tr>
+                                <th>DAY/TIME</th>
+                                {% for hour in hours %}
+                                <th>{{ hour }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+                            <tbody class="text-center">
+                            {% for day in days %}
+                            <tr>
+                                <th>{{ day }}</th>
+                                {% for hour in hours %}
+                                <th>
+                                    {% for entry in first_timetable_entries_100 %}
+                                    {% if entry.start_time == hour and entry.day == day %}
+                                    {{ entry.course.code }}
+                                    {% endif %}
+                                    {% endfor %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+
+                    {% if second_timetable_entries_100 %}
+                    <div class="table-responsive mb-3">
+                        <h2>100Lvl Second Semester Timetable</h2>
+                        <table class="table">
+                            <thead class="text-center">
+                            <tr>
+                                <th>DAY/TIME</th>
+                                {% for hour in hours %}
+                                <th>{{ hour }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+                            <tbody class="text-center">
+                            {% for day in days %}
+                            <tr>
+                                <th>{{ day }}</th>
+                                {% for hour in hours %}
+                                <th>
+                                    {% for entry in second_timetable_entries_100 %}
+                                    {% if entry.start_time == hour and entry.day == day %}
+                                    {{ entry.course.code }}
+                                    {% endif %}
+                                    {% endfor %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+
+                    {% if first_timetable_entries_200 %}
+                    <div class="table-responsive mb-3">
+                        <h2>200Lvl First Semester Timetable</h2>
+                        <table class="table">
+                            <thead class="text-center">
+                            <tr>
+                                <th>DAY/TIME</th>
+                                {% for hour in hours %}
+                                <th>{{ hour }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+                            <tbody class="text-center">
+                            {% for day in days %}
+                            <tr>
+                                <th>{{ day }}</th>
+                                {% for hour in hours %}
+                                <th>
+                                    {% for entry in first_timetable_entries_200 %}
+                                    {% if entry.start_time == hour and entry.day == day %}
+                                    {{ entry.course.code }}
+                                    {% endif %}
+                                    {% endfor %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+
+                    {% if second_timetable_entries_200 %}
+                    <div class="table-responsive mb-3">
+                        <h2>200Lvl Second Semester Timetable</h2>
+                        <table class="table">
+                            <thead class="text-center">
+                            <tr>
+                                <th>DAY/TIME</th>
+                                {% for hour in hours %}
+                                <th>{{ hour }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+                            <tbody class="text-center">
+                            {% for day in days %}
+                            <tr>
+                                <th>{{ day }}</th>
+                                {% for hour in hours %}
+                                <th>
+                                    {% for entry in second_timetable_entries_200 %}
+                                    {% if entry.start_time == hour and entry.day == day %}
+                                    {{ entry.course.code }}
+                                    {% endif %}
+                                    {% endfor %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+
+                    {% if first_timetable_entries_300 %}
+                    <div class="table-responsive mb-3">
+                        <h2>300Lvl First Semester Timetable</h2>
+                        <table class="table">
+                            <thead class="text-center">
+                            <tr>
+                                <th>DAY/TIME</th>
+                                {% for hour in hours %}
+                                <th>{{ hour }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+                            <tbody class="text-center">
+                            {% for day in days %}
+                            <tr>
+                                <th>{{ day }}</th>
+                                {% for hour in hours %}
+                                <th>
+                                    {% for entry in first_timetable_entries_300 %}
+                                    {% if entry.start_time == hour and entry.day == day %}
+                                    {{ entry.course.code }}
+                                    {% endif %}
+                                    {% endfor %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+
+                    {% if second_timetable_entries_300 %}
+                    <div class="table-responsive mb-3">
+                        <h2>300Lvl Second Semester Timetable</h2>
+                        <table class="table">
+                            <thead class="text-center">
+                            <tr>
+                                <th>DAY/TIME</th>
+                                {% for hour in hours %}
+                                <th>{{ hour }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+                            <tbody class="text-center">
+                            {% for day in days %}
+                            <tr>
+                                <th>{{ day }}</th>
+                                {% for hour in hours %}
+                                <th>
+                                    {% for entry in second_timetable_entries_300 %}
+                                    {% if entry.start_time == hour and entry.day == day %}
+                                    {{ entry.course.code }}
+                                    {% endif %}
+                                    {% endfor %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+
+                    {% if first_timetable_entries_400 %}
+                    <div class="table-responsive mb-3">
+                        <h2>400Lvl First Semester Timetable</h2>
+                        <table class="table">
+                            <thead class="text-center">
+                            <tr>
+                                <th>DAY/TIME</th>
+                                {% for hour in hours %}
+                                <th>{{ hour }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+                            <tbody class="text-center">
+                            {% for day in days %}
+                            <tr>
+                                <th>{{ day }}</th>
+                                {% for hour in hours %}
+                                <th>
+                                    {% for entry in first_timetable_entries_400 %}
+                                    {% if entry.start_time == hour and entry.day == day %}
+                                    {{ entry.course.code }}
+                                    {% endif %}
+                                    {% endfor %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+
+                    {% if second_timetable_entries_400 %}
+                    <div class="table-responsive mb-3">
+                        <h2>400Lvl Second Semester Timetable</h2>
+                        <table class="table">
+                            <thead class="text-center">
+                            <tr>
+                                <th>DAY/TIME</th>
+                                {% for hour in hours %}
+                                <th>{{ hour }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+                            <tbody class="text-center">
+                            {% for day in days %}
+                            <tr>
+                                <th>{{ day }}</th>
+                                {% for hour in hours %}
+                                <th>
+                                    {% for entry in second_timetable_entries_400 %}
+                                    {% if entry.start_time == hour and entry.day == day %}
+                                    {{ entry.course.code }}
+                                    {% endif %}
+                                    {% endfor %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+{% endblock content %}

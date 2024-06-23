@@ -1,0 +1,84 @@
+{% extends 'main.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<section class="users-edit">
+    <div class="card">
+        <div class="card-content">
+            <div class="card-body">
+                <ul class="nav nav-tabs mb-2" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center active" id="account-tab" data-toggle="tab"
+                           href="#account" aria-controls="account" role="tab" aria-selected="true">
+                            <i class="la la-user mr-25"></i><span class="d-none d-sm-block">Generate Timetable</span>
+                        </a>
+                    </li>
+                </ul>
+                <div id="toast">
+                    {% for message in messages %}
+                    <div class="alert alert-info" role="alert"><strong></strong><i>{{ message }}</i></div>
+                    {% endfor %}
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="account" aria-labelledby="account-tab" role="tabpanel">
+                        <div class="row">
+                            <div class="col-12 col-sm-6">
+                                <form method="post" action="">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <div class="controls">
+                                            <label>Generate Timetable for a Semester</label>
+                                            <select class="form-control mb-2" id="level" name="level" required>
+                                                <option value="">--- Select Level ---</option>
+                                                <option value="100">100</option>
+                                                <option value="200">200</option>
+                                                <option value="300">300</option>
+                                                <option value="400">400</option>
+                                            </select>
+
+                                            <select class="form-control" id="semester" name="semester" required>
+                                                <option value="">--- Select Semester ---</option>
+                                                <option value="1">First Semester</option>
+                                                <option value="2">Second Semester</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-lg btn-primary glow mb-1 mb-sm-0 mr-0 mr-sm-1">
+                                        Generate
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <form method="post" action="{% url 'generate_session_timetable' %}">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <div class="controls">
+                                            <label>Generate Timetable for a Level</label>
+                                            <select class="form-control" name="level" required>
+                                                <option value="">--- Select Level ---</option>
+                                                <option value="100">100</option>
+                                                <option value="200">200</option>
+                                                <option value="300">300</option>
+                                                <option value="400">400</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-lg btn-primary glow mb-1 mb-sm-0 mr-0 mr-sm-1">
+                                        Generate
+                                    </button>
+                                </form>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

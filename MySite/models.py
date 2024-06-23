@@ -48,7 +48,6 @@ HOUR_CHOICES = [
 # Models
 class Lecturer(models.Model):
     name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
 
     def __str__(self):
         return self.name
@@ -81,8 +80,8 @@ class Timetable(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     level = models.CharField(max_length=3, choices=LEVEL_CHOICES)
     day = models.CharField(max_length=3, choices=DAY_CHOICES)
-    start_time = models.TimeField(choices=HOUR_CHOICES)
-    end_time = models.TimeField(choices=HOUR_CHOICES)
+    start_time = models.CharField(max_length=9, choices=HOUR_CHOICES)
+    end_time = models.CharField(max_length=9, choices=HOUR_CHOICES)
     semester = models.CharField(max_length=1, choices=SEMESTER_CHOICES)
     session = models.CharField(max_length=9, choices=SESSION_CHOICES)
 
