@@ -19,7 +19,7 @@ class StudentAdmin(admin.ModelAdmin):
 
 @admin.register(Timetable)
 class TimetableAdmin(admin.ModelAdmin):
-    list_display = ['course', 'level', 'day', 'start_time', 'end_time', 'semester', 'session']
+    list_display = ['course', 'level', 'day', 'start_time', 'end_time', 'venue', 'semester', 'session']
 
 
 @admin.register(CourseRegistration)

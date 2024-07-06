@@ -82,11 +82,9 @@ class Timetable(models.Model):
     day = models.CharField(max_length=3, choices=DAY_CHOICES)
     start_time = models.CharField(max_length=9, choices=HOUR_CHOICES)
     end_time = models.CharField(max_length=9, choices=HOUR_CHOICES)
+    venue = models.CharField(max_length=255)
     semester = models.CharField(max_length=1, choices=SEMESTER_CHOICES)
     session = models.CharField(max_length=9, choices=SESSION_CHOICES)
-
-    class Meta:
-        unique_together = ('course', 'day', 'start_time', 'semester', 'session')
 
     def __str__(self):
         return f"{self.course.code} - {self.level} Level - {self.day} {self.start_time}-{self.end_time}"

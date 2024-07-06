@@ -1,3 +1,5 @@
+import random
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -262,19 +264,19 @@ def generate_timetable(level, semester, session):
 
     days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
     hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00']
+    venues = ['CAS 1', 'CAS 2', 'CAS 3', 'HL', 'SL']
 
-    # Initialize timetable slots as a dictionary
-    timetable_slots = {day: {hour: None for hour in hours} for day in days}
+    # Initialize timetable slots as a dictionary of lists
+    timetable_slots = {day: {hour: [] for hour in hours} for day in days}
 
     courses = courses.order_by('-units')  # Sort courses by descending units
 
-    # Helper function to get the next available slot
-    def get_next_available_slot():
-        for day in days:
-            for hour in hours:
-                if timetable_slots[day][hour] is None:
-                    return day, hour
-        return None, None
+    # Helper function to get a random slot
+    def get_random_slot():
+        day = random.choice(days)
+        hour = random.choice(hours)
+        venue = random.choice(venues)
+        return day, hour, venue
 
     timetable_entries = []
 
@@ -282,26 +284,23 @@ def generate_timetable(level, semester, session):
         for course in courses:
             assigned_hours = 0
             while assigned_hours < course.units:
-                day, hour = get_next_available_slot()
-                if day is None or hour is None:
-                    raise ValueError("Not enough slots to accommodate all courses")
+                day, hour, venue = get_random_slot()
 
                 start_time = hour
-                # Calculate the end_time by adding one hour to start_time
                 end_time = f"{int(start_time[:2]) + 1:02}:00"
 
                 # Assign the course to the slot
-                timetable_slots[day][hour] = course
+                timetable_slots[day][hour].append((course, venue))
                 timetable_entry = Timetable(
                     course=course,
                     level=level,
                     day=day,
                     start_time=start_time,
                     end_time=end_time,
+                    venue=venue,
                     semester=semester,
                     session=session,
                 )
-                print(timetable_entry.start_time)
                 timetable_entries.append(timetable_entry)
                 assigned_hours += 1
 
